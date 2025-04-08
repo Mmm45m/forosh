@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>لیست محصولات</title>
+  <style>
+    body { font-family: sans-serif; direction: rtl; background: #f7f7f7; padding: 20px; }
+    .product { border: 1px solid #ccc; padding: 10px; margin: 10px 0; background: #fff; border-radius: 8px; }
+    button { padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:disabled { background: #999; cursor: not-allowed; }
+    input, textarea { margin-bottom: 10px; padding: 8px; width: 100%; border-radius: 4px; border: 1px solid #ddd; }
+    .product-form { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>مدیریت محصولات</h1>
+
+  <!-- جستجوی محصولات -->
+  <div>
+    <label for="search-product">جستجوی محصول:</label>
+    <input type="text" id="search-product" placeholder="نام محصول را وارد کنید" oninput="searchProduct()">
+  </div>
+
+  <!-- لیست محصولات -->
+  <h2>لیست محصولات</h2>
+  <div id="product-list"></div>
+
+  <script>
+    let products = [];
+    const container = document.getElementById("product-list");
+
+    fetch("products.json?v=1")
+      .then(res => res.json())
+      .then(data => {
+        products = data;
+        displayProducts();
+      });
+
+    function displayProducts() {
+      container.innerHTML = "";
+      products.forEach((product, index) => {
+        if (product.stock > 0) {
+          container.innerHTML += `
+            <div class="product">
+              <img src="${product.image}" alt="${product.name}" width="100px" height="100px">
+              <h3>${product.name}</h3>
+              <p><strong>توضیحات:</strong> ${product.description}</p>
+              <p><strong>رنگ:</strong> ${product.color || '---'}</p>
+              <p><strong>قیمت فروش:</strong> ${product.price.toLocaleString()} تومان</p>
+              <p><strong>قیمت خرید:</strong> ${product.cost.toLocaleString()} تومان</p>
+              <p><strong>موجودی:</strong> <span id="stock-${product.id}">${product.stock}</span></p>
+              <button onclick="registerSale(${index})">ثبت خرید</button>
+            </div>
+          `;
+        }
+      });
+    }
+
+    function registerSale(index) {
+      const product = products[index];
+      const shippingCost = prompt("هزینه ارسال (تومان):", "0");
+      const shipping = parseInt(shippingCost);
+      if (isNaN(shipping)) {
+        alert("مقدار هزینه ارسال نامعتبر است.");
+        return;
+      }
+
+      const sales = JSON.parse(localStorage.getItem("sales") || "[]");
+
+      if (product.stock <= 0) {
+        alert("موجودی این محصول تمام شده!");
+        return;
+      }
+
+      product.stock -= 1;
+
+      sales.push({
+        productId: product.id,
+        qty: 1,
+        shipping: shipping,
+        datetime: new Date().toISOString()
+      });
+
+      localStorage.setItem("sales", JSON.stringify(sales));
+      document.getElementById(`stock-${product.id}`).textContent = product.stock;
+      alert("خرید ثبت شد ✅");
+    }
+
+    function searchProduct() {
+      const query = document.getElementById("search-product").value.toLowerCase();
+      container.innerHTML = "";
+
+      products.forEach((product, index) => {
+        if (product.name.toLowerCase().includes(query) && product.stock > 0) {
+          container.innerHTML += `
+            <div class="product">
+              <img src="${product.image}" alt="${product.name}" width="100px" height="100px">
+              <h3>${product.name}</h3>
+              <p><strong>توضیحات:</strong> ${product.description}</p>
+              <p><strong>رنگ:</strong> ${product.color || '---'}</p>
+              <p><strong>قیمت فروش:</strong> ${product.price.toLocaleString()} تومان</p>
+              <p><strong>قیمت خرید:</strong> ${product.cost.toLocaleString()} تومان</p>
+              <p><strong>موجودی:</strong> <span id="stock-${product.id}">${product.stock}</span></p>
+              <button onclick="registerSale(${index})">ثبت خرید</button>
+            </div>
+          `;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
