@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "پیراهن مردانه",
+    "description": "پیراهن نخی خوش‌دوخت",
+    "price": 200000,
+    "cost": 150000,
+    "stock": 5,
+    "color": "آبی",
+    "image": "https://via.placeholder.com/100"
+  },
+  {
+    "id": 2,
+    "name": "شلوار جین",
+    "description": "شلوار جین کلاسیک",
+    "price": 250000,
+    "cost": 180000,
+    "stock": 3,
+    "color": "آبی تیره",
+    "image": "https://via.placeholder.com/100"
+  }
+]
